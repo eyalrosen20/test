@@ -32,11 +32,21 @@ def send_in_bindwidth(request):
     vector = np.random.default_rng().normal(size=(VECTOR_SIZE,))
 
   request.send(vector.tobytes())
-  micro_elapsed = (dt.datetime.now() - start_time).microseconds
-  micro_to_hold = 1000 - micro_elapsed
-  seconds_to_hold = abs(micro_to_hold / 1000000)
+
+  microseconds = (dt.datetime.now() - start_time).microseconds
+  milliseconds = microseconds / 1000
+  seconds = round(milliseconds / 1000, 6)
+
+  required_time = 0.001000
+  delta = 0.000200
+  seconds_to_hold = round(required_time - delta - seconds, 6)
   time.sleep(seconds_to_hold)
-  hertz = (dt.datetime.now() - start_time).microseconds
+
+  microseconds = (dt.datetime.now() - start_time).microseconds
+  milliseconds = microseconds / 1000
+  seconds = round(milliseconds / 1000, 6)
+
+  hertz = round(seconds * 1000000)
   print(f"sending rate: {hertz} hertz")
 
 
@@ -66,7 +76,12 @@ def get_new_vector(sock):
   sock.sendall(bytes("NEW_VECTOR\n", "utf-8"))
   vector_bytes = sock.recv(1024)
   vector = np.frombuffer(vector_bytes, dtype=np.float64)
-  hertz = (dt.datetime.now() - start_time).microseconds * 10
+  
+  microseconds = (dt.datetime.now() - start_time).microseconds
+  milliseconds = microseconds / 1000
+  seconds = round(milliseconds / 1000, 6)
+  hertz = round(seconds * 1000000)
+  
   print(f"recieving rate: {hertz} hertz")
   return vector, hertz
 
